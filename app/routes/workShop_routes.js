@@ -31,21 +31,22 @@ const router = express.Router()
 router.get('/workshops',requireToken,(req ,res,next)=>{
     // console.log(res)
     const id = req.user.id;
-    WorkShop.find({'owner':id})
+    WorkShop.find({})
     .then(workShops =>{
         res.status(200).json({workShops:workShops})
     })
     .catch(next)   
 })
 
+ 
 // GET SHOW
-router.get("/workshop/:id", requireToken, (req, res, next)=>{
-    const idWorkshop = req.params.id
-    WorkShop.findById(idWorkshop)
+router.get("/workshops/:id", requireToken, (req, res, next)=>{
+    const workshopId = req.params.id
+    WorkShop.findById(workshopId)
     .then(handle404)
     .then(workshop =>{
         requireOwnership(req , workshop)
-        res.status(200).json({workshop: workshop.toObject()})
+        res.status(200).json({workshop})
     })
     .catch(next)
 })
@@ -66,22 +67,20 @@ router.post('/workshops',requireToken,(req,res,  next)=>{
 })
 // UPDATE
 // PATCH -
-router.patch('/workshops/:id', requireToken, removeBlanks,(req, res, next)=>{
+router.patch('/workshops/:id', requireToken,(req, res, next)=>{
     // prevent delete 
     delete req.body.workshop.owner
-
     const idWorkshop = req.params.id;
-    const updateWorkshop = req.body.workShops;
-
+    const updateWorkshop = req.body.workshop;
     WorkShop.findByIdAndUpdate(idWorkshop)
-    .then(handle404)
+    // .then(handle404)
     .then(workshop =>{
   
         requireOwnership(req , workshop)
 
         return workshop.update(req.body.workshop)
     })
-    .then(()=> res.status(204))
+    .then(()=> res.sendStatus(204))
     .catch(next)
 })
 
